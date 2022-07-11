@@ -1,0 +1,103 @@
+//리액트를 사용하지않고 리덕스사용 연습 (리덕스 개념이해)
+
+import { createStore } from "redux";
+
+    const lightDiv = document.getElementsByClassName("light")[0];
+    const switchButton = document.getElementById("switch-btn");
+    
+    const counterHeadings = document.getElementsByTagName("h1")[0];
+    const plusButton = document.getElementById("plus-btn");
+    const minusButton = document.getElementById("minus-btn");
+    
+    // 액션 타입 정의
+    const TOGGLE_SWITCH = "TOGGLE_SWITCH";
+    const INCREMENT = "INCREMENT";
+    const DECREMENT = "DECREMENT";
+    
+    // 액션 생성함수 정의
+    const toggleSwitch = () => ({
+        type: TOGGLE_SWITCH
+    });
+    const increment = (diff) => ({
+        type: INCREMENT,
+        diff
+    });
+    const decrement = () => ({
+        type: DECREMENT
+    });
+    
+    //초기값 설정
+    const initialState = {
+        light: false,
+        counter: 0
+    };
+    
+    //리듀서 함수 정의
+    //리듀서는 이전의 상태는 절대로 건들지 않고, 
+    //변화를 일으킨 새로운 상태 객체를 만들어서 반환해줌
+    //똑같은 파라미터로 호출된 리듀서 함수는 언제나 똑같은 결과값을 반환해야함
+    function reducer(state = initialState, action) {
+        switch (action.type) {
+        case TOGGLE_SWITCH:
+            return {
+            ...state, //기존의 값은 그대로 두면서
+            light: !state.light //light값은 반전시키기
+          }; //return
+    
+        case INCREMENT:
+            return {
+            ...state,
+            counter: state.counter + action.diff
+          }; //return
+    
+        case DECREMENT:
+            return {
+            ...state,
+            counter: state.counter - 1
+          }; //return
+    
+        default:
+          //지원하지 않는 액션의 경우 상태 유지
+            return state;
+      } //switch
+    } //reducer
+    
+    // 스토어 만들기
+    const store = createStore(reducer);
+    
+    // render함수 만들기
+    const render = () => {
+      const state = store.getState(); //현재상태를 가져오기
+      const { light, counter } = state; //편의상 비구조화 할당
+        if (light) {
+        lightDiv.style.background = "green";
+        switchButton.innerText = "끄기";
+        } else {
+        lightDiv.style.background = "gray";
+        switchButton.innerText = "켜기";
+      } //if-else
+    
+        counterHeadings.innerText = counter;
+    }; //render
+    
+    render();
+    
+    // 구독하기
+    store.subscribe(render);
+    
+    //이벤트 달아주기
+    switchButton.onClick = () => {
+        store.dispatch(toggleSwitch());
+    };
+    
+    plusButton.onClick = () => {
+        store.dispatch(increment(5));
+    };
+    
+    minusButton.onClick = () => {
+        store.dispatch(decrement());
+    };
+    
+
+//reducer가 여러개 일때는 redux의 내장함수인 combineReducers 를 사용하여 리듀서를 하나로 합치는 작업을 함
+// 여러개로 나뉘어진 리듀서들을 서브리듀서, 하나로 합쳐진 리듀서를 루트 리듀서라 부름
